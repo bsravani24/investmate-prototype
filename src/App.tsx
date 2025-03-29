@@ -1,9 +1,17 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import SplashScreen from "./pages/SplashScreen";
+import Signup from "./pages/Signup";
+import Learn from "./pages/Learn";
+import Invest from "./pages/Invest";
+import Account from "./pages/Account";
+import DashboardPage from "./pages/Dashboard";
+import AccountSetupPage from "./pages/AccountSetup";
+import SetAutopayPage from "./pages/SetAutopay";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -15,8 +23,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<SplashScreen />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/learn" element={<Learn />} />
+          <Route path="/invest" element={<Invest />} />
+          <Route path="/account" element={<Account />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/account-setup" element={<AccountSetupPage />} />
+          <Route path="/set-autopay" element={<SetAutopayPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
