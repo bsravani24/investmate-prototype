@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
-import { Sparkles, Info, TrendingUp, Star } from 'lucide-react';
+import { Sparkles, Info, TrendingUp, Star, DollarSign } from 'lucide-react';
 
 const AiSuggestions: React.FC = () => {
   const [riskLevel, setRiskLevel] = useState<number>(3);
   const [investmentAmount, setInvestmentAmount] = useState<number>(100);
   const [showResults, setShowResults] = useState<boolean>(false);
   const [selectedExplanation, setSelectedExplanation] = useState<string>("concise");
+  const [virtualMoneyMode, setVirtualMoneyMode] = useState<boolean>(false);
   
   const handleRiskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRiskLevel(parseInt(e.target.value));
@@ -18,6 +19,15 @@ const AiSuggestions: React.FC = () => {
   
   const handleSubmit = () => {
     setShowResults(true);
+  };
+
+  const handleVirtualMoney = () => {
+    setVirtualMoneyMode(true);
+  };
+
+  const handleRealMoney = () => {
+    // Redirect to dashboard would go here
+    window.location.href = '/dashboard';
   };
 
   return (
@@ -43,9 +53,15 @@ const AiSuggestions: React.FC = () => {
                 />
               </div>
               <div className="flex justify-between text-sm">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+              </div>
+              <div className="flex justify-between text-sm">
                 <span>Conservative</span>
-                <span>Moderate</span>
-                <span>Aggressive</span>
+                <span className="text-right">Aggressive</span>
               </div>
             </div>
             
@@ -191,27 +207,43 @@ const AiSuggestions: React.FC = () => {
             </div>
           </div>
           
-          <div className="card-dark p-4 mb-6">
-            <div className="flex items-center space-x-2 mb-4">
-              <TrendingUp className="text-accent" size={20} />
-              <h3>Virtual Money Trial</h3>
-            </div>
-            
-            <p className="mb-4">You got ₹1,000 virtual funds! See how these suggestions would have performed.</p>
-            
-            <div className="bg-muted/20 p-3 rounded-lg mb-4">
-              <div className="flex justify-between mb-2">
-                <span className="font-medium">7-Day Performance</span>
-                <span className="text-accent">+₹28 (2.8%)</span>
+          {!virtualMoneyMode ? (
+            <div className="card-dark p-4 mb-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <TrendingUp className="text-accent" size={20} />
+                <h3>Virtual Money Trial</h3>
               </div>
-              <div className="progress-bar mb-2">
-                <div className="progress-fill" style={{ width: '74%' }}></div>
+              
+              <p className="mb-4">Not sure about investing real money yet? Try with ₹1,000 virtual funds to see how these suggestions would perform without any risk.</p>
+              
+              <div className="flex space-x-3">
+                <button onClick={handleVirtualMoney} className="flex-1 btn-secondary">Try Virtual Money</button>
+                <button onClick={handleRealMoney} className="flex-1 btn-primary">Use Real Money</button>
               </div>
-              <p className="text-sm text-muted-foreground">Mainly driven by recovery in tech stocks and positive market sentiment.</p>
             </div>
-            
-            <button className="btn-secondary w-full">Try with Real Money</button>
-          </div>
+          ) : (
+            <div className="card-dark p-4 mb-6">
+              <div className="flex items-center space-x-2 mb-4">
+                <TrendingUp className="text-accent" size={20} />
+                <h3>Virtual Money Trial</h3>
+              </div>
+              
+              <div className="bg-muted/20 p-3 rounded-lg mb-4">
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">7-Day Performance</span>
+                  <span className="text-accent">+₹28 (2.8%)</span>
+                </div>
+                <div className="progress-bar mb-2">
+                  <div className="progress-fill" style={{ width: '74%' }}></div>
+                </div>
+                <p className="text-sm text-muted-foreground">Mainly driven by recovery in tech stocks and positive market sentiment.</p>
+              </div>
+              
+              <p className="mb-4">Your virtual investment is performing well! Ready to invest with real money?</p>
+              
+              <button onClick={handleRealMoney} className="btn-primary w-full">Switch to Real Money</button>
+            </div>
+          )}
         </div>
       )}
     </div>

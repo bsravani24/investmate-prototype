@@ -35,7 +35,7 @@ const SplashScreen: React.FC = () => {
       
       <div className={`text-center transition-all duration-1000 delay-500 ${animate ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
         <p className="text-xl text-muted-foreground">
-          Micro-investing made simple
+          Micro investing for India's macro dreams
         </p>
       </div>
     </div>

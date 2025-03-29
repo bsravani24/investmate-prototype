@@ -1,7 +1,11 @@
 
 import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { ArrowUpRight, Award, BookOpen, TrendingUp, PieChart, ChevronRight, Bell } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RPieChart, Pie, Cell } from 'recharts';
+import { 
+  ArrowUpRight, Award, BookOpen, TrendingUp, PieChart, 
+  ChevronRight, Bell, AlertTriangle, PlayCircle, Settings, 
+  Sparkles, BarChart3, ShieldCheck, HelpCircle
+} from 'lucide-react';
 
 interface InvestmentData {
   name: string;
@@ -12,6 +16,7 @@ interface InvestmentData {
 
 const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [autoSwitch, setAutoSwitch] = useState(false);
 
   const chartData = [
     { month: 'Apr', value: 10000 },
@@ -52,6 +57,49 @@ const Dashboard: React.FC = () => {
     setShowNotifications(!showNotifications);
   };
 
+  const pieData = [
+    { name: 'Mutual Funds', value: 8800 },
+    { name: 'Gold ETF', value: 2400 },
+  ];
+  
+  const COLORS = ['#f97316', '#0ea5e9'];
+  
+  const trendingInsights = [
+    {
+      title: "Gold ETFs up 4% this week!",
+      description: "Safe haven assets gaining momentum"
+    },
+    {
+      title: "Top Performing Fund: Navi Large Cap Fund +6.2% this month",
+      description: "Benefiting from IT sector rally"
+    },
+    {
+      title: "Tech Stocks See a Dip: -3.1% Today",
+      description: "Profit booking after recent rally"
+    }
+  ];
+
+  const aiPerformance = {
+    value: 3.5,
+    isPositive: true,
+    data: [2, 2.2, 2.5, 3, 3.2, 3.5]
+  };
+
+  const selfPerformance = {
+    value: 2.2,
+    isPositive: true,
+    data: [1.5, 1.8, 2.0, 2.1, 2.2, 2.2]
+  };
+
+  const miniChartData = (data: number[]) => {
+    return data.map((value, index) => ({ value, index }));
+  };
+
+  const activeRiskRules = [
+    "If a fund drops by 3%, move to safer assets",
+    "If portfolio losses exceed ₹5,000, shift 20% to Gold ETFs"
+  ];
+
   return (
     <div className="p-4 pb-20">
       <div className="flex justify-between items-center mb-6">
@@ -86,61 +134,253 @@ const Dashboard: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Trending Market Insights */}
+      <div className="mb-6">
+        <h3 className="mb-3">What's Happening in the Market?</h3>
+        <div className="flex overflow-x-auto pb-2 space-x-3">
+          {trendingInsights.map((insight, index) => (
+            <div key={index} className="card-dark p-3 min-w-[250px]">
+              <h4 className="text-md font-medium mb-1">{insight.title}</h4>
+              <p className="text-sm text-muted-foreground">{insight.description}</p>
+            </div>
+          ))}
+          <div className="card-dark p-3 min-w-[200px] flex items-center justify-center">
+            <button className="text-secondary flex items-center">
+              Explore More Trends <ChevronRight size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
       
-      <div className="card-dark p-4 mb-6">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Total Portfolio Value</p>
-            <h2 className="text-2xl font-bold">₹{totalInvestment.toLocaleString()}</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        {/* Portfolio Overview */}
+        <div className="card-dark p-4">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Total Portfolio Value</p>
+              <h2 className="text-2xl font-bold">₹{totalInvestment.toLocaleString()}</h2>
+            </div>
+            <div className="bg-accent/20 text-accent px-2 py-1 rounded flex items-center">
+              <ArrowUpRight size={16} className="mr-1" />
+              <span>7.8%</span>
+            </div>
           </div>
-          <div className="bg-accent/20 text-accent px-2 py-1 rounded flex items-center">
-            <ArrowUpRight size={16} className="mr-1" />
-            <span>7.8%</span>
+          
+          <div className="h-40 mb-4">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <XAxis 
+                  dataKey="month" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
+                <YAxis 
+                  hide={true}
+                  domain={['dataMin - 500', 'dataMax + 500']}
+                />
+                <Tooltip 
+                  formatter={(value: number) => [`₹${value}`, 'Value']}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    color: 'hsl(var(--card-foreground))'
+                  }}
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="value" 
+                  stroke="hsl(var(--primary))" 
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: 'hsl(var(--primary))' }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
+          
+          <div className="grid grid-cols-2 gap-2 text-center">
+            <div className="bg-muted/20 p-2 rounded-lg">
+              <p className="text-sm text-muted-foreground">Invested</p>
+              <p className="font-medium">₹10,000</p>
+            </div>
+            <div className="bg-muted/20 p-2 rounded-lg">
+              <p className="text-sm text-muted-foreground">Returns</p>
+              <p className="font-medium text-accent">+₹1,200</p>
+            </div>
+          </div>
+
+          <div className="mt-4 flex justify-center">
+            <div className="w-24 h-24">
+              <RPieChart width={100} height={100}>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={25}
+                  outerRadius={40}
+                  fill="#8884d8"
+                  dataKey="value"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+              </RPieChart>
+            </div>
+          </div>
+
+          <div className="flex justify-around text-sm text-center">
+            <div className="flex flex-col items-center">
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[0] }}></div>
+                <span className="ml-1">Mutual Funds</span>
+              </div>
+              <span className="font-medium">₹8,800</span>
+            </div>
+            <div className="flex flex-col items-center">
+              <div className="flex items-center">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[1] }}></div>
+                <span className="ml-1">Gold ETF</span>
+              </div>
+              <span className="font-medium">₹2,400</span>
+            </div>
+          </div>
+
+          <button className="w-full text-secondary flex items-center justify-center mt-4">
+            View Portfolio Details <ChevronRight size={16} className="ml-1" />
+          </button>
         </div>
-        
-        <div className="h-40 mb-4">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <XAxis 
-                dataKey="month" 
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
-              />
-              <YAxis 
-                hide={true}
-                domain={['dataMin - 500', 'dataMax + 500']}
-              />
-              <Tooltip 
-                formatter={(value: number) => [`₹${value}`, 'Value']}
-                contentStyle={{
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px',
-                  color: 'hsl(var(--card-foreground))'
-                }}
-              />
-              <Line 
-                type="monotone" 
-                dataKey="value" 
-                stroke="hsl(var(--primary))" 
-                strokeWidth={2}
-                dot={false}
-                activeDot={{ r: 4, fill: 'hsl(var(--primary))' }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-2 text-center">
-          <div className="bg-muted/20 p-2 rounded-lg">
-            <p className="text-sm text-muted-foreground">Invested</p>
-            <p className="font-medium">₹10,000</p>
+
+        {/* AI vs Human Comparison */}
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="card-dark p-4">
+              <div className="flex items-center mb-2">
+                <Sparkles className="text-secondary mr-2" size={16} />
+                <h4>AI Performance</h4>
+              </div>
+              <div className="flex items-center mb-3">
+                <span className={`text-xl font-bold ${aiPerformance.isPositive ? 'text-accent' : 'text-destructive'}`}>
+                  {aiPerformance.isPositive ? '+' : ''}{aiPerformance.value}%
+                </span>
+              </div>
+              <div className="h-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={miniChartData(aiPerformance.data)}>
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="hsl(var(--secondary))" 
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              {aiPerformance.value > selfPerformance.value && (
+                <button className="w-full text-secondary text-sm flex items-center justify-center mt-2">
+                  Try AI Investing <ChevronRight size={14} className="ml-1" />
+                </button>
+              )}
+            </div>
+
+            <div className="card-dark p-4">
+              <div className="flex items-center mb-2">
+                <Settings className="text-accent mr-2" size={16} />
+                <h4>Your Investments</h4>
+              </div>
+              <div className="flex items-center mb-3">
+                <span className={`text-xl font-bold ${selfPerformance.isPositive ? 'text-accent' : 'text-destructive'}`}>
+                  {selfPerformance.isPositive ? '+' : ''}{selfPerformance.value}%
+                </span>
+              </div>
+              <div className="h-16">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={miniChartData(selfPerformance.data)}>
+                    <Line 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="hsl(var(--accent))" 
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+              {aiPerformance.value <= selfPerformance.value && (
+                <button className="w-full text-accent text-sm flex items-center justify-center mt-2">
+                  Tweak AI Strategy <ChevronRight size={14} className="ml-1" />
+                </button>
+              )}
+            </div>
           </div>
-          <div className="bg-muted/20 p-2 rounded-lg">
-            <p className="text-sm text-muted-foreground">Returns</p>
-            <p className="font-medium text-accent">+₹1,200</p>
+
+          {/* Risk Alerts */}
+          <div className="card-dark p-4">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center">
+                <AlertTriangle className="text-primary mr-2" size={18} />
+                <h4>Risk Management</h4>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  value="" 
+                  className="sr-only peer" 
+                  checked={autoSwitch}
+                  onChange={() => setAutoSwitch(!autoSwitch)}
+                />
+                <div className="w-11 h-6 bg-muted/30 peer-focus:outline-none rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+              </label>
+            </div>
+            
+            {autoSwitch ? (
+              <div className="space-y-2">
+                <p className="text-sm mb-2">Active Risk Rules:</p>
+                {activeRiskRules.map((rule, index) => (
+                  <div key={index} className="flex items-center text-sm p-2 bg-muted/20 rounded-lg">
+                    <ShieldCheck size={16} className="text-accent mr-2" />
+                    <span>{rule}</span>
+                  </div>
+                ))}
+                <button className="w-full text-secondary text-sm flex items-center justify-center mt-2">
+                  Edit Risk Settings <ChevronRight size={14} className="ml-1" />
+                </button>
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground p-4">
+                <p>No active risk management set</p>
+                <p className="text-sm mt-2">Enable auto-switch to protect your investments from market volatility</p>
+              </div>
+            )}
+          </div>
+
+          {/* Investment Simulator & Video */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="card-dark p-4">
+              <div className="flex items-center mb-3">
+                <PlayCircle className="text-primary mr-2" size={18} />
+                <h4>Learn How It Works</h4>
+              </div>
+              <p className="text-sm mb-3">See how MicroInvestMate helps you build wealth step by step</p>
+              <button className="w-full text-white bg-secondary py-2 rounded-lg flex items-center justify-center">
+                Watch Now
+              </button>
+            </div>
+            
+            <div className="card-dark p-4">
+              <div className="flex items-center mb-3">
+                <BarChart3 className="text-secondary mr-2" size={18} />
+                <h4>Investment Simulator</h4>
+              </div>
+              <p className="text-sm mb-3">Test strategies before investing real money</p>
+              <button className="w-full text-white bg-primary py-2 rounded-lg flex items-center justify-center">
+                Try Simulator
+              </button>
+            </div>
           </div>
         </div>
       </div>

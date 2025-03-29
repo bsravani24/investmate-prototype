@@ -1,21 +1,46 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowRight, PieChart, Sparkles, Settings } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SplitInvestment: React.FC = () => {
+  const navigate = useNavigate();
   const [aiAmount, setAiAmount] = useState<number>(500);
   const [selfAmount, setSelfAmount] = useState<number>(500);
+  const [totalAmount, setTotalAmount] = useState<number>(1000);
   
   const handleAiChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
+    const value = parseInt(e.target.value) || 0;
     setAiAmount(value);
-    setSelfAmount(1000 - value);
+    setSelfAmount(totalAmount - value);
   };
   
   const handleSelfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value);
+    const value = parseInt(e.target.value) || 0;
     setSelfAmount(value);
-    setAiAmount(1000 - value);
+    setAiAmount(totalAmount - value);
+  };
+
+  const handleTotalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value) || 0;
+    setTotalAmount(value);
+    
+    // Maintain the same proportion
+    const aiProportion = aiAmount / (aiAmount + selfAmount);
+    setAiAmount(Math.round(value * aiProportion));
+    setSelfAmount(Math.round(value * (1 - aiProportion)));
+  };
+
+  useEffect(() => {
+    // Make sure we correct for rounding errors
+    if (aiAmount + selfAmount !== totalAmount) {
+      const diff = totalAmount - (aiAmount + selfAmount);
+      setAiAmount(aiAmount + diff);
+    }
+  }, [aiAmount, selfAmount, totalAmount]);
+
+  const handleContinue = () => {
+    navigate('/dashboard');
   };
 
   return (
@@ -29,65 +54,84 @@ const SplitInvestment: React.FC = () => {
         <p className="mb-4">Allocate your funds between AI-managed investments and your own selections</p>
         
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <label className="flex items-center">
+          <label className="flex justify-between items-center mb-2">
+            <div className="flex items-center">
               <Sparkles className="text-secondary mr-2" size={18} />
               AI Suggestions
-            </label>
-            <span className="font-medium">₹{aiAmount}</span>
-          </div>
-          <input 
-            type="range" 
-            min="0" 
-            max="1000" 
-            step="100"
-            value={aiAmount} 
-            onChange={handleAiChange}
-            className="w-full mb-1"
-          />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>₹0</span>
-            <span>₹1,000</span>
+            </div>
+          </label>
+          <div className="flex items-center">
+            <span className="mr-2">₹</span>
+            <input 
+              type="number" 
+              min="0" 
+              max={totalAmount}
+              value={aiAmount} 
+              onChange={handleAiChange}
+              className="input-field w-full"
+            />
           </div>
         </div>
         
         <div className="mb-6">
-          <div className="flex justify-between items-center mb-2">
-            <label className="flex items-center">
+          <label className="flex justify-between items-center mb-2">
+            <div className="flex items-center">
               <Settings className="text-accent mr-2" size={18} />
               Your Choices
-            </label>
-            <span className="font-medium">₹{selfAmount}</span>
+            </div>
+          </label>
+          <div className="flex items-center">
+            <span className="mr-2">₹</span>
+            <input 
+              type="number" 
+              min="0" 
+              max={totalAmount}
+              value={selfAmount} 
+              onChange={handleSelfChange}
+              className="input-field w-full"
+            />
           </div>
-          <input 
-            type="range" 
-            min="0" 
-            max="1000" 
-            step="100"
-            value={selfAmount} 
-            onChange={handleSelfChange}
-            className="w-full mb-1"
-          />
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>₹0</span>
-            <span>₹1,000</span>
+        </div>
+        
+        <div className="mb-6">
+          <label className="flex justify-between items-center mb-2">
+            <div className="flex items-center">
+              <PieChart className="text-primary mr-2" size={18} />
+              Total Investment
+            </div>
+          </label>
+          <div className="flex items-center">
+            <span className="mr-2">₹</span>
+            <input 
+              type="number" 
+              min="100" 
+              value={totalAmount} 
+              onChange={handleTotalChange}
+              className="input-field w-full"
+            />
           </div>
         </div>
         
         <div className="bg-muted/20 rounded-lg p-3 mb-6">
-          <div className="flex justify-between mb-2">
-            <span>Total Monthly Investment</span>
-            <span className="font-medium">₹1,000</span>
-          </div>
           <div className="flex w-full h-3 rounded-full overflow-hidden">
             <div 
               className="bg-secondary" 
-              style={{ width: `${(aiAmount/1000)*100}%` }}
+              style={{ width: `${(aiAmount/totalAmount)*100}%` }}
             ></div>
             <div 
               className="bg-accent" 
-              style={{ width: `${(selfAmount/1000)*100}%` }}
+              style={{ width: `${(selfAmount/totalAmount)*100}%` }}
             ></div>
+          </div>
+          <div className="flex justify-between mt-2 text-sm">
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-secondary rounded-full mr-1"></div>
+              <span>AI: ₹{aiAmount} ({Math.round((aiAmount/totalAmount)*100)}%)</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 bg-accent rounded-full mr-1"></div>
+              <span>You: ₹{selfAmount} ({Math.round((selfAmount/totalAmount)*100)}%)</span>
+            </div>
           </div>
         </div>
       </div>
@@ -102,8 +146,12 @@ const SplitInvestment: React.FC = () => {
               <span className="text-accent">₹{Math.round(aiAmount * 0.4)}</span>
             </div>
             <p className="text-sm text-muted-foreground mb-2">30% returns in last 3 years</p>
+            <p className="text-sm mb-2">Recommended for beginners seeking stable growth with lower volatility.</p>
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: '70%' }}></div>
+            </div>
+            <div className="flex justify-end mt-2">
+              <button className="text-secondary text-sm">Learn more about this fund</button>
             </div>
           </div>
           
@@ -113,8 +161,12 @@ const SplitInvestment: React.FC = () => {
               <span className="text-accent">₹{Math.round(aiAmount * 0.3)}</span>
             </div>
             <p className="text-sm text-muted-foreground mb-2">25% returns in last 3 years</p>
+            <p className="text-sm mb-2">Focuses on technology sector with high growth potential in the Indian market.</p>
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: '65%' }}></div>
+            </div>
+            <div className="flex justify-end mt-2">
+              <button className="text-secondary text-sm">Learn more about this fund</button>
             </div>
           </div>
           
@@ -124,14 +176,18 @@ const SplitInvestment: React.FC = () => {
               <span className="text-accent">₹{Math.round(aiAmount * 0.3)}</span>
             </div>
             <p className="text-sm text-muted-foreground mb-2">18% returns in last 3 years</p>
+            <p className="text-sm mb-2">A safe hedge against market volatility backed by physical gold.</p>
             <div className="progress-bar">
               <div className="progress-fill" style={{ width: '60%' }}></div>
+            </div>
+            <div className="flex justify-end mt-2">
+              <button className="text-secondary text-sm">Learn more about this ETF</button>
             </div>
           </div>
         </div>
       </div>
       
-      <button className="btn-primary w-full flex items-center justify-center">
+      <button onClick={handleContinue} className="btn-primary w-full flex items-center justify-center">
         Continue <ArrowRight size={18} className="ml-2" />
       </button>
     </div>
