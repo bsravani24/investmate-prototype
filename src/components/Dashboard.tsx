@@ -1,11 +1,24 @@
 
 import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RPieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RPieChart, Pie, Cell, BarChart, Bar, CartesianGrid, Legend } from 'recharts';
 import { 
   ArrowUpRight, Award, BookOpen, TrendingUp, PieChart, 
   ChevronRight, Bell, AlertTriangle, PlayCircle, Settings, 
-  Sparkles, BarChart3, ShieldCheck, HelpCircle
+  Sparkles, BarChart3, ShieldCheck, HelpCircle, Calendar, BarChart2, LineChart as LineChartIcon
 } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface InvestmentData {
   name: string;
@@ -17,16 +30,80 @@ interface InvestmentData {
 const Dashboard: React.FC = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [autoSwitch, setAutoSwitch] = useState(false);
+  const [chartType, setChartType] = useState<'line' | 'bar'>('line');
+  const [dateRange, setDateRange] = useState<'1W' | '1M' | '3M' | '6M' | '1Y' | 'All'>('1M');
 
-  const chartData = [
-    { month: 'Apr', value: 10000 },
-    { month: 'May', value: 10200 },
-    { month: 'Jun', value: 10150 },
-    { month: 'Jul', value: 10400 },
-    { month: 'Aug', value: 10600 },
-    { month: 'Sep', value: 10900 },
-    { month: 'Oct', value: 11200 },
-  ];
+  // Generate date-based chart data based on selected range
+  const generateChartData = () => {
+    const getDate = (daysAgo: number) => {
+      const date = new Date();
+      date.setDate(date.getDate() - daysAgo);
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    };
+    
+    switch(dateRange) {
+      case '1W':
+        return [
+          { date: getDate(6), value: 10100 },
+          { date: getDate(5), value: 10050 },
+          { date: getDate(4), value: 10150 },
+          { date: getDate(3), value: 10200 },
+          { date: getDate(2), value: 10300 },
+          { date: getDate(1), value: 10500 },
+          { date: getDate(0), value: 10600 },
+        ];
+      case '1M':
+        return [
+          { date: getDate(30), value: 10000 },
+          { date: getDate(25), value: 10150 },
+          { date: getDate(20), value: 10250 },
+          { date: getDate(15), value: 10400 },
+          { date: getDate(10), value: 10550 },
+          { date: getDate(5), value: 10750 },
+          { date: getDate(0), value: 11200 },
+        ];
+      case '3M':
+        return [
+          { date: 'Jan', value: 9800 },
+          { date: 'Feb', value: 10200 },
+          { date: 'Mar', value: 10400 },
+          { date: 'Apr', value: 11200 },
+        ];
+      case '6M':
+        return [
+          { date: 'Nov', value: 9500 },
+          { date: 'Dec', value: 9800 },
+          { date: 'Jan', value: 10000 },
+          { date: 'Feb', value: 10200 },
+          { date: 'Mar', value: 10400 },
+          { date: 'Apr', value: 11200 },
+        ];
+      case '1Y':
+        return [
+          { date: 'May', value: 9200 },
+          { date: 'Jul', value: 9400 },
+          { date: 'Sep', value: 9600 },
+          { date: 'Nov', value: 9800 },
+          { date: 'Jan', value: 10200 },
+          { date: 'Mar', value: 10600 },
+          { date: 'Apr', value: 11200 },
+        ];
+      case 'All':
+        return [
+          { date: '2022', value: 8500 },
+          { date: '2023-Q1', value: 9000 },
+          { date: '2023-Q2', value: 9300 },
+          { date: '2023-Q3', value: 9800 },
+          { date: '2023-Q4', value: 10200 },
+          { date: '2024-Q1', value: 10600 },
+          { date: 'Current', value: 11200 },
+        ];
+      default:
+        return [];
+    }
+  };
+  
+  const chartData = generateChartData();
   
   const investments: InvestmentData[] = [
     { 
@@ -100,6 +177,77 @@ const Dashboard: React.FC = () => {
     "If portfolio losses exceed ₹5,000, shift 20% to Gold ETFs"
   ];
 
+  const handleDateRangeChange = (range: '1W' | '1M' | '3M' | '6M' | '1Y' | 'All') => {
+    setDateRange(range);
+  };
+
+  const renderChart = () => {
+    if (chartType === 'line') {
+      return (
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+          <XAxis 
+            dataKey="date" 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+          />
+          <YAxis 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            domain={['dataMin - 500', 'dataMax + 500']}
+          />
+          <Tooltip 
+            formatter={(value: number) => [`₹${value}`, 'Value']}
+            contentStyle={{
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '8px',
+              color: 'hsl(var(--card-foreground))'
+            }}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="value" 
+            stroke="hsl(var(--primary))" 
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4, fill: 'hsl(var(--primary))' }}
+          />
+        </LineChart>
+      );
+    } else {
+      return (
+        <BarChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+          <XAxis 
+            dataKey="date" 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+          />
+          <YAxis 
+            axisLine={false}
+            tickLine={false}
+            tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            domain={['dataMin - 500', 'dataMax + 500']}
+          />
+          <Tooltip 
+            formatter={(value: number) => [`₹${value}`, 'Value']}
+            contentStyle={{
+              backgroundColor: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              borderRadius: '8px',
+              color: 'hsl(var(--card-foreground))'
+            }}
+          />
+          <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+        </BarChart>
+      );
+    }
+  };
+
   return (
     <div className="p-4 pb-20">
       <div className="flex justify-between items-center mb-6">
@@ -167,38 +315,54 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
           
-          <div className="h-40 mb-4">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <XAxis 
-                  dataKey="month" 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
-                />
-                <YAxis 
-                  hide={true}
-                  domain={['dataMin - 500', 'dataMax + 500']}
-                />
-                <Tooltip 
-                  formatter={(value: number) => [`₹${value}`, 'Value']}
-                  contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    color: 'hsl(var(--card-foreground))'
-                  }}
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey="value" 
-                  stroke="hsl(var(--primary))" 
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, fill: 'hsl(var(--primary))' }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+          <div className="mb-4">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex space-x-2">
+                <button 
+                  onClick={() => setChartType('line')} 
+                  className={`p-1.5 rounded ${chartType === 'line' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+                >
+                  <LineChartIcon size={16} />
+                </button>
+                <button 
+                  onClick={() => setChartType('bar')} 
+                  className={`p-1.5 rounded ${chartType === 'bar' ? 'bg-muted text-primary' : 'text-muted-foreground'}`}
+                >
+                  <BarChart2 size={16} />
+                </button>
+              </div>
+              
+              <div className="flex bg-muted rounded-lg overflow-hidden">
+                {(['1W', '1M', '3M', '6M', '1Y', 'All'] as const).map((range) => (
+                  <button
+                    key={range}
+                    onClick={() => handleDateRangeChange(range)}
+                    className={`px-2 py-1 text-xs ${dateRange === range ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}
+                  >
+                    {range}
+                  </button>
+                ))}
+              </div>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                    <HelpCircle size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem>Customize Chart</DropdownMenuItem>
+                  <DropdownMenuItem>Export Data</DropdownMenuItem>
+                  <DropdownMenuItem>View Detailed Analytics</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            
+            <div className="h-40">
+              <ResponsiveContainer width="100%" height="100%">
+                {renderChart()}
+              </ResponsiveContainer>
+            </div>
           </div>
           
           <div className="grid grid-cols-2 gap-2 text-center">

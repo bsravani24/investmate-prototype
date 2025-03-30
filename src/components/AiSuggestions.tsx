@@ -1,13 +1,90 @@
 
-import React, { useState } from 'react';
-import { Sparkles, Info, TrendingUp, Star, DollarSign } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Sparkles, Info, TrendingUp, Star, DollarSign, Filter, Search, Check, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { useNavigate } from 'react-router-dom';
 
 const AiSuggestions: React.FC = () => {
+  const navigate = useNavigate();
   const [riskLevel, setRiskLevel] = useState<number>(3);
   const [investmentAmount, setInvestmentAmount] = useState<number>(100);
   const [showResults, setShowResults] = useState<boolean>(false);
   const [selectedExplanation, setSelectedExplanation] = useState<string>("concise");
   const [virtualMoneyMode, setVirtualMoneyMode] = useState<boolean>(false);
+  const [aiThinking, setAiThinking] = useState<boolean>(false);
+  const [expandedSuggestion, setExpandedSuggestion] = useState<number | null>(null);
+  
+  // New suggested investments array
+  const [suggestedInvestments, setSuggestedInvestments] = useState([
+    {
+      id: 1,
+      name: "Bluechip Index Fund",
+      tag: "Recommended",
+      tagClass: "bg-primary/20 text-primary",
+      description: "Tracks top 50 Indian companies with consistent performance and lower volatility.",
+      returns: "15.8%",
+      details: {
+        "1Y Return": "12.4%",
+        "3Y Return": "15.8%",
+        "5Y Return": "18.2%",
+        "Assets Under Management": "₹12,450 Cr",
+        "Expense Ratio": "0.44%",
+        "Risk Level": "Moderate",
+        "Min Investment": "₹500"
+      }
+    },
+    {
+      id: 2,
+      name: "Balanced Advantage Fund",
+      tag: "Low Risk",
+      tagClass: "bg-accent/20 text-accent",
+      description: "Dynamically manages equity and debt allocation based on market conditions.",
+      returns: "12.2%",
+      details: {
+        "1Y Return": "9.6%",
+        "3Y Return": "12.2%",
+        "5Y Return": "14.1%",
+        "Assets Under Management": "₹8,240 Cr",
+        "Expense Ratio": "0.52%",
+        "Risk Level": "Low to Moderate",
+        "Min Investment": "₹500"
+      }
+    },
+    {
+      id: 3,
+      name: "Sovereign Gold Bond",
+      tag: "Trending",
+      tagClass: "bg-secondary/20 text-secondary",
+      description: "Government-backed gold investment with additional interest income.",
+      returns: "9.6%",
+      details: {
+        "1Y Return": "8.2%",
+        "3Y Return": "9.6%",
+        "5Y Return": "11.4%",
+        "Interest Rate": "2.5% p.a.",
+        "Tenure": "8 years",
+        "Liquidity": "Secondary market trading",
+        "Min Investment": "₹1,000"
+      }
+    },
+    {
+      id: 4,
+      name: "Digital India Fund",
+      tag: "High Growth",
+      tagClass: "bg-orange-400/20 text-orange-400",
+      description: "Focuses on technology and digital economy sectors with high growth potential.",
+      returns: "19.4%",
+      details: {
+        "1Y Return": "16.8%",
+        "3Y Return": "19.4%",
+        "5Y Return": "22.6%",
+        "Assets Under Management": "₹5,120 Cr",
+        "Expense Ratio": "0.68%",
+        "Risk Level": "High",
+        "Min Investment": "₹500"
+      }
+    }
+  ]);
   
   const handleRiskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setRiskLevel(parseInt(e.target.value));
@@ -18,7 +95,13 @@ const AiSuggestions: React.FC = () => {
   };
   
   const handleSubmit = () => {
-    setShowResults(true);
+    setAiThinking(true);
+    
+    // Simulate AI thinking process
+    setTimeout(() => {
+      setAiThinking(false);
+      setShowResults(true);
+    }, 3000);
   };
 
   const handleVirtualMoney = () => {
@@ -26,13 +109,53 @@ const AiSuggestions: React.FC = () => {
   };
 
   const handleRealMoney = () => {
-    // Redirect to dashboard would go here
-    window.location.href = '/dashboard';
+    navigate('/dashboard');
+  };
+  
+  const replaceSuggestion = (id: number) => {
+    const newSuggestions = [...suggestedInvestments];
+    const index = newSuggestions.findIndex(item => item.id === id);
+    
+    // Replace with a new suggestion (in a real app, this would pull from an API)
+    if (index !== -1) {
+      newSuggestions[index] = {
+        id: Math.random(), // Generate a new ID
+        name: "Small Cap Growth Fund",
+        tag: "High Risk",
+        tagClass: "bg-destructive/20 text-destructive",
+        description: "Invests in small companies with high growth potential but higher volatility.",
+        returns: "22.6%",
+        details: {
+          "1Y Return": "18.4%",
+          "3Y Return": "22.6%",
+          "5Y Return": "25.8%",
+          "Assets Under Management": "₹3,450 Cr",
+          "Expense Ratio": "0.78%",
+          "Risk Level": "High",
+          "Min Investment": "₹500"
+        }
+      };
+      
+      setSuggestedInvestments(newSuggestions);
+    }
+  };
+  
+  const toggleSuggestionDetails = (id: number) => {
+    if (expandedSuggestion === id) {
+      setExpandedSuggestion(null);
+    } else {
+      setExpandedSuggestion(id);
+    }
+  };
+  
+  const handleInvestButtonClick = () => {
+    // In a real app, this would pass selected investments to the next screen
+    navigate('/invest');
   };
 
   return (
     <div className="p-4">
-      {!showResults ? (
+      {!showResults && !aiThinking ? (
         <div className="animate-fade-in">
           <div className="flex items-center mb-6">
             <Sparkles className="text-primary mr-2" size={24} />
@@ -152,6 +275,28 @@ const AiSuggestions: React.FC = () => {
             Get AI Suggestions <Sparkles size={18} className="ml-2" />
           </button>
         </div>
+      ) : aiThinking ? (
+        <div className="flex flex-col items-center justify-center h-[80vh] animate-fade-in">
+          <div className="relative w-16 h-16 mb-6">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Sparkles size={32} className="text-primary animate-pulse" />
+            </div>
+            <div className="absolute inset-0 border-t-2 border-primary rounded-full animate-spin"></div>
+          </div>
+          <h3 className="text-center mb-4">AI is analyzing your profile</h3>
+          <div className="text-center text-muted-foreground max-w-xs">
+            <p className="mb-2">Analyzing:</p>
+            <ul className="text-sm space-y-1">
+              <li>• Risk tolerance</li>
+              <li>• Investment goals</li>
+              <li>• Investment amount</li>
+              <li>• Similar investor profiles</li>
+              <li>• Time horizons (short & long-term)</li>
+              <li>• Past investment performance</li>
+              <li>• Diversification strategy</li>
+            </ul>
+          </div>
+        </div>
       ) : (
         <div className="animate-fade-in">
           <button 
@@ -161,51 +306,70 @@ const AiSuggestions: React.FC = () => {
             ← Back to preferences
           </button>
           
-          <div className="mb-4">
-            <h2 className="flex items-center mb-2">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="flex items-center">
               <Sparkles className="text-primary mr-2" size={24} />
               AI Suggestions
             </h2>
-            <p className="text-muted-foreground">Based on your {riskLevel === 1 ? 'conservative' : riskLevel === 5 ? 'aggressive' : 'moderate'} risk profile</p>
+            <button className="flex items-center text-muted-foreground">
+              <Filter size={18} className="mr-1" />
+              Filter
+            </button>
+          </div>
+          <p className="text-muted-foreground mb-4">Based on your {riskLevel === 1 ? 'conservative' : riskLevel === 5 ? 'aggressive' : 'moderate'} risk profile</p>
+          
+          <div className="space-y-4 mb-6 max-h-80 overflow-y-auto pr-1 scrollbar-thin">
+            {suggestedInvestments.map((item) => (
+              <div key={item.id} className="card-dark p-4">
+                <div className="flex justify-between items-start mb-3">
+                  <h4>{item.name}</h4>
+                  <div className={`${item.tagClass} px-2 py-1 rounded text-sm`}>{item.tag}</div>
+                </div>
+                <p className="text-sm mb-3">{item.description}</p>
+                
+                <div className="flex justify-between items-center text-sm mb-2">
+                  <span className="text-muted-foreground">3Y Returns: {item.returns}</span>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => toggleSuggestionDetails(item.id)}
+                      className="text-secondary flex items-center"
+                    >
+                      Details {expandedSuggestion === item.id ? <ChevronUp size={14} className="ml-1" /> : <ChevronDown size={14} className="ml-1" />}
+                    </button>
+                    <button className="text-accent bg-accent/10 rounded-full p-1">
+                      <Check size={16} />
+                    </button>
+                    <button 
+                      className="text-destructive bg-destructive/10 rounded-full p-1"
+                      onClick={() => replaceSuggestion(item.id)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+                
+                {expandedSuggestion === item.id && (
+                  <div className="mt-3 pt-3 border-t border-border animate-fade-in">
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(item.details).map(([key, value]) => (
+                        <div key={key} className="bg-muted/20 p-2 rounded-lg">
+                          <p className="text-xs text-muted-foreground">{key}</p>
+                          <p className="text-sm font-medium">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
           
-          <div className="space-y-4 mb-6">
-            <div className="card-dark p-4">
-              <div className="flex justify-between items-start mb-3">
-                <h4>Bluechip Index Fund</h4>
-                <div className="bg-primary/20 text-primary px-2 py-1 rounded text-sm">Recommended</div>
-              </div>
-              <p className="text-sm mb-3">Tracks top 50 Indian companies with consistent performance and lower volatility.</p>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">3Y Returns: 15.8%</span>
-                <button className="text-secondary">Know More</button>
-              </div>
-            </div>
-            
-            <div className="card-dark p-4">
-              <div className="flex justify-between items-start mb-3">
-                <h4>Balanced Advantage Fund</h4>
-                <div className="bg-accent/20 text-accent px-2 py-1 rounded text-sm">Low Risk</div>
-              </div>
-              <p className="text-sm mb-3">Dynamically manages equity and debt allocation based on market conditions.</p>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">3Y Returns: 12.2%</span>
-                <button className="text-secondary">Know More</button>
-              </div>
-            </div>
-            
-            <div className="card-dark p-4">
-              <div className="flex justify-between items-start mb-3">
-                <h4>Sovereign Gold Bond</h4>
-                <div className="bg-secondary/20 text-secondary px-2 py-1 rounded text-sm">Trending</div>
-              </div>
-              <p className="text-sm mb-3">Government-backed gold investment with additional interest income.</p>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">3Y Returns: 9.6%</span>
-                <button className="text-secondary">Know More</button>
-              </div>
-            </div>
-          </div>
+          <button 
+            onClick={handleInvestButtonClick} 
+            className="btn-primary w-full flex items-center justify-center mb-6"
+          >
+            Let's Invest Your Money (₹{investmentAmount * 100}) <DollarSign size={18} className="ml-2" />
+          </button>
           
           {!virtualMoneyMode ? (
             <div className="card-dark p-4 mb-6">

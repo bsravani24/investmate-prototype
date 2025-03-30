@@ -5,6 +5,7 @@ import Navigation from '../components/Navigation';
 import InvestSelf from '../components/InvestSelf';
 import AiSuggestions from '../components/AiSuggestions';
 import SplitInvestment from '../components/SplitInvestment';
+import { Button } from "@/components/ui/button";
 
 type InvestmentTab = 'self' | 'ai' | 'split';
 
