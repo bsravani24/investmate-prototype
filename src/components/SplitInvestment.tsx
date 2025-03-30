@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, PieChart, Sparkles, Settings, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, PieChart, Sparkles, Settings, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 
