@@ -69,6 +69,10 @@ const SplitInvestment: React.FC = () => {
     }
   };
 
+  const handleInvestYourChoices = () => {
+    navigate('/invest?mode=self&amount=' + selfAmount);
+  };
+
   return (
     <div className="p-4">
       {aiThinking ? (
@@ -82,14 +86,9 @@ const SplitInvestment: React.FC = () => {
           <h3 className="text-center mb-4">AI is analyzing your investment split</h3>
           <div className="text-center text-muted-foreground max-w-xs">
             <p className="mb-2">Analyzing:</p>
-            <ul className="text-sm space-y-1">
-              <li>• Risk tolerance</li>
-              <li>• Investment allocation split</li>
-              <li>• Total investment amount</li>
-              <li>• Optimal diversification</li>
-              <li>• Time horizons (short & long-term)</li>
-              <li>• Market conditions</li>
-            </ul>
+            <p className="text-sm">
+              Risk tolerance, investment allocation split, total investment amount, optimal diversification, time horizons (short & long-term), market conditions
+            </p>
           </div>
         </div>
       ) : (
@@ -205,9 +204,15 @@ const SplitInvestment: React.FC = () => {
           </div>
           
           <div className="card-dark p-4 mb-6">
-            <h3 className="mb-4">AI Suggestions</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="mb-0">AI Suggestions</h3>
+              <button className="text-sm text-muted-foreground flex items-center">
+                <Filter size={14} className="mr-1" />
+                Filter
+              </button>
+            </div>
             
-            <div className="space-y-4">
+            <div className="space-y-4 max-h-72 overflow-y-auto scrollbar-thin pr-1">
               <div className="border border-border p-3 rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <h4>Bluechip Index Fund</h4>
@@ -339,9 +344,15 @@ const SplitInvestment: React.FC = () => {
             </div>
           </div>
           
-          <button onClick={handleContinue} className="btn-primary w-full flex items-center justify-center">
-            Continue <ArrowRight size={18} className="ml-2" />
-          </button>
+          <div className="flex flex-col space-y-4 mb-6">
+            <button onClick={handleContinue} className="btn-primary w-full flex items-center justify-center">
+              Continue <ArrowRight size={18} className="ml-2" />
+            </button>
+            
+            <button onClick={handleInvestYourChoices} className="btn-secondary w-full flex items-center justify-center">
+              Go to Invest on Your Choices (₹{selfAmount}) <ArrowRight size={18} className="ml-2" />
+            </button>
+          </div>
         </>
       )}
     </div>

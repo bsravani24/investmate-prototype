@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart a
 import { 
   ArrowUpRight, Award, BookOpen, TrendingUp, PieChart, 
   ChevronRight, Bell, AlertTriangle, PlayCircle, Settings, 
-  Sparkles, BarChart3, ShieldCheck, HelpCircle, Calendar, BarChart2, LineChart as LineChartIcon
+  Sparkles, BarChart3, ShieldCheck, HelpCircle, Calendar, BarChart2, LineChart as LineChartIcon, X
 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +32,10 @@ const Dashboard: React.FC = () => {
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
   const [dateRange, setDateRange] = useState<'1W' | '1M' | '3M' | '6M' | '1Y' | 'All'>('1M');
+  const [showSimulator, setShowSimulator] = useState<boolean>(false);
+  const [selectedAsset, setSelectedAsset] = useState<string>("");
+  const [simulatorAmount, setSimulatorAmount] = useState<number>(1000);
+  const [showSimulatorResults, setShowSimulatorResults] = useState<boolean>(false);
 
   // Generate date-based chart data based on selected range
   const generateChartData = () => {
@@ -179,6 +183,44 @@ const Dashboard: React.FC = () => {
 
   const handleDateRangeChange = (range: '1W' | '1M' | '3M' | '6M' | '1Y' | 'All') => {
     setDateRange(range);
+  };
+  
+  const handleOpenSimulator = () => {
+    setShowSimulator(true);
+  };
+
+  const handleSimulatorAssetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAsset(e.target.value);
+  };
+
+  const handleSimulatorAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSimulatorAmount(parseInt(e.target.value));
+  };
+
+  const handleRunSimulation = () => {
+    if (selectedAsset && simulatorAmount > 0) {
+      setShowSimulatorResults(true);
+    }
+  };
+
+  const handleCloseSimulator = () => {
+    setShowSimulator(false);
+    setShowSimulatorResults(false);
+    setSelectedAsset("");
+  };
+
+  const getSimulatorReturnAmount = () => {
+    // This would normally pull real data, using mock values for prototype
+    switch (selectedAsset) {
+      case "gold":
+        return simulatorAmount * 1.004; // 0.4% gain
+      case "mutual":
+        return simulatorAmount * 1.012; // 1.2% gain
+      case "nifty":
+        return simulatorAmount * 1.008; // 0.8% gain
+      default:
+        return simulatorAmount;
+    }
   };
 
   const renderChart = () => {
@@ -541,7 +583,10 @@ const Dashboard: React.FC = () => {
                 <h4>Investment Simulator</h4>
               </div>
               <p className="text-sm mb-3">Test strategies before investing real money</p>
-              <button className="w-full text-white bg-primary py-2 rounded-lg flex items-center justify-center">
+              <button 
+                onClick={handleOpenSimulator}
+                className="w-full text-white bg-primary py-2 rounded-lg flex items-center justify-center"
+              >
                 Try Simulator
               </button>
             </div>
@@ -617,6 +662,88 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      
+      {/* Investment Simulator Modal */}
+      {showSimulator && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-card rounded-lg w-full max-w-md">
+            <div className="p-4 border-b border-border flex justify-between items-center">
+              <h3>Investment Simulator</h3>
+              <button onClick={handleCloseSimulator} className="text-muted-foreground">
+                <X size={20} />
+              </button>
+            </div>
+            
+            {!showSimulatorResults ? (
+              <div className="p-4">
+                <p className="text-sm mb-4">
+                  Try the simulator to see how your investment would have performed over the past 7 days in different assets.
+                </p>
+                
+                <div className="mb-4">
+                  <label className="block mb-2">Select Asset</label>
+                  <select 
+                    className="input-field w-full bg-background text-foreground"
+                    value={selectedAsset}
+                    onChange={handleSimulatorAssetChange}
+                  >
+                    <option value="">-- Select an asset --</option>
+                    <option value="mutual">Mutual Funds</option>
+                    <option value="gold">Gold ETF</option>
+                    <option value="nifty">Nifty 50 Index Fund</option>
+                  </select>
+                </div>
+                
+                <div className="mb-6">
+                  <label className="block mb-2">Investment Amount (₹)</label>
+                  <input 
+                    type="number" 
+                    value={simulatorAmount} 
+                    onChange={handleSimulatorAmountChange}
+                    className="input-field w-full"
+                    min="100"
+                  />
+                </div>
+                
+                <button 
+                  onClick={handleRunSimulation}
+                  disabled={!selectedAsset}
+                  className="btn-primary w-full"
+                >
+                  Run Simulation
+                </button>
+              </div>
+            ) : (
+              <div className="p-4">
+                <div className="bg-muted/20 p-3 rounded-lg mb-4">
+                  <h4 className="mb-2">7-Day Performance Results</h4>
+                  <div className="mb-2">
+                    <p>Initial Investment: <span className="font-medium">₹{simulatorAmount}</span></p>
+                    <p>Current Value: <span className="font-medium text-accent">₹{getSimulatorReturnAmount().toFixed(2)}</span></p>
+                    <p>Return: <span className="font-medium text-accent">
+                      +₹{(getSimulatorReturnAmount() - simulatorAmount).toFixed(2)} 
+                      ({(((getSimulatorReturnAmount() - simulatorAmount) / simulatorAmount) * 100).toFixed(1)}%)
+                    </span></p>
+                  </div>
+                  <div className="progress-bar mb-2">
+                    <div className="progress-fill" style={{ width: '60%' }}></div>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedAsset === 'gold' && "Gold has been stable with slight gains due to global economic uncertainty."}
+                    {selectedAsset === 'mutual' && "Mutual funds performed well this week due to strong company earnings."}
+                    {selectedAsset === 'nifty' && "The Nifty 50 index showed moderate growth on the back of positive market sentiment."}
+                  </p>
+                </div>
+                
+                <div className="flex space-x-3">
+                  <button onClick={() => setShowSimulatorResults(false)} className="flex-1 btn-secondary">Try Another</button>
+                  <button onClick={() => navigate('/invest')} className="flex-1 btn-primary">Invest Now</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

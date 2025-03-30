@@ -1,16 +1,32 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PieChart, Sparkles, Settings } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import InvestSelf from '../components/InvestSelf';
 import AiSuggestions from '../components/AiSuggestions';
 import SplitInvestment from '../components/SplitInvestment';
 import { Button } from "@/components/ui/button";
+import { useLocation } from 'react-router-dom';
 
 type InvestmentTab = 'self' | 'ai' | 'split';
 
 const Invest: React.FC = () => {
   const [activeTab, setActiveTab] = useState<InvestmentTab>('self');
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Check if there are query parameters to set the initial tab
+    const params = new URLSearchParams(location.search);
+    const mode = params.get('mode');
+    
+    if (mode === 'self') {
+      setActiveTab('self');
+    } else if (mode === 'ai') {
+      setActiveTab('ai');
+    } else if (mode === 'split') {
+      setActiveTab('split');
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-background pb-20">

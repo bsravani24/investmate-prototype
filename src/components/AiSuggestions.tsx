@@ -14,6 +14,12 @@ const AiSuggestions: React.FC = () => {
   const [aiThinking, setAiThinking] = useState<boolean>(false);
   const [expandedSuggestion, setExpandedSuggestion] = useState<number | null>(null);
   
+  // Virtual money simulator state
+  const [showSimulator, setShowSimulator] = useState<boolean>(false);
+  const [selectedAsset, setSelectedAsset] = useState<string>("");
+  const [simulatorAmount, setSimulatorAmount] = useState<number>(1000);
+  const [showSimulatorResults, setShowSimulatorResults] = useState<boolean>(false);
+  
   // New suggested investments array
   const [suggestedInvestments, setSuggestedInvestments] = useState([
     {
@@ -153,6 +159,44 @@ const AiSuggestions: React.FC = () => {
     navigate('/invest');
   };
 
+  const handleOpenSimulator = () => {
+    setShowSimulator(true);
+  };
+
+  const handleSimulatorAssetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedAsset(e.target.value);
+  };
+
+  const handleSimulatorAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSimulatorAmount(parseInt(e.target.value));
+  };
+
+  const handleRunSimulation = () => {
+    if (selectedAsset && simulatorAmount > 0) {
+      setShowSimulatorResults(true);
+    }
+  };
+
+  const handleCloseSimulator = () => {
+    setShowSimulator(false);
+    setShowSimulatorResults(false);
+    setSelectedAsset("");
+  };
+
+  const getSimulatorReturnAmount = () => {
+    // This would normally pull real data, using mock values for prototype
+    switch (selectedAsset) {
+      case "gold":
+        return simulatorAmount * 1.004; // 0.4% gain
+      case "mutual":
+        return simulatorAmount * 1.012; // 1.2% gain
+      case "nifty":
+        return simulatorAmount * 1.008; // 0.8% gain
+      default:
+        return simulatorAmount;
+    }
+  };
+
   return (
     <div className="p-4">
       {!showResults && !aiThinking ? (
@@ -286,15 +330,9 @@ const AiSuggestions: React.FC = () => {
           <h3 className="text-center mb-4">AI is analyzing your profile</h3>
           <div className="text-center text-muted-foreground max-w-xs">
             <p className="mb-2">Analyzing:</p>
-            <ul className="text-sm space-y-1">
-              <li>• Risk tolerance</li>
-              <li>• Investment goals</li>
-              <li>• Investment amount</li>
-              <li>• Similar investor profiles</li>
-              <li>• Time horizons (short & long-term)</li>
-              <li>• Past investment performance</li>
-              <li>• Diversification strategy</li>
-            </ul>
+            <p className="text-sm">
+              Risk tolerance, investment goals, investment amount, similar investor profiles, time horizons (short & long-term), past investment performance, diversification strategy
+            </p>
           </div>
         </div>
       ) : (
@@ -406,6 +444,88 @@ const AiSuggestions: React.FC = () => {
               <p className="mb-4">Your virtual investment is performing well! Ready to invest with real money?</p>
               
               <button onClick={handleRealMoney} className="btn-primary w-full">Switch to Real Money</button>
+            </div>
+          )}
+          
+          {/* Simulator Panel */}
+          {showSimulator && (
+            <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-card rounded-lg w-full max-w-md">
+                <div className="p-4 border-b border-border flex justify-between items-center">
+                  <h3>Investment Simulator</h3>
+                  <button onClick={handleCloseSimulator} className="text-muted-foreground">
+                    <X size={20} />
+                  </button>
+                </div>
+                
+                {!showSimulatorResults ? (
+                  <div className="p-4">
+                    <p className="text-sm mb-4">
+                      Try the simulator to see how your investment would have performed over the past 7 days in different assets.
+                    </p>
+                    
+                    <div className="mb-4">
+                      <label className="block mb-2">Select Asset</label>
+                      <select 
+                        className="input-field w-full bg-background text-foreground"
+                        value={selectedAsset}
+                        onChange={handleSimulatorAssetChange}
+                      >
+                        <option value="">-- Select an asset --</option>
+                        <option value="mutual">Mutual Funds</option>
+                        <option value="gold">Gold ETF</option>
+                        <option value="nifty">Nifty 50 Index Fund</option>
+                      </select>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <label className="block mb-2">Investment Amount (₹)</label>
+                      <input 
+                        type="number" 
+                        value={simulatorAmount} 
+                        onChange={handleSimulatorAmountChange}
+                        className="input-field w-full"
+                        min="100"
+                      />
+                    </div>
+                    
+                    <button 
+                      onClick={handleRunSimulation}
+                      disabled={!selectedAsset}
+                      className="btn-primary w-full"
+                    >
+                      Run Simulation
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-4">
+                    <div className="bg-muted/20 p-3 rounded-lg mb-4">
+                      <h4 className="mb-2">7-Day Performance Results</h4>
+                      <div className="mb-2">
+                        <p>Initial Investment: <span className="font-medium">₹{simulatorAmount}</span></p>
+                        <p>Current Value: <span className="font-medium text-accent">₹{getSimulatorReturnAmount().toFixed(2)}</span></p>
+                        <p>Return: <span className="font-medium text-accent">
+                          +₹{(getSimulatorReturnAmount() - simulatorAmount).toFixed(2)} 
+                          ({(((getSimulatorReturnAmount() - simulatorAmount) / simulatorAmount) * 100).toFixed(1)}%)
+                        </span></p>
+                      </div>
+                      <div className="progress-bar mb-2">
+                        <div className="progress-fill" style={{ width: '60%' }}></div>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedAsset === 'gold' && "Gold has been stable with slight gains due to global economic uncertainty."}
+                        {selectedAsset === 'mutual' && "Mutual funds performed well this week due to strong company earnings."}
+                        {selectedAsset === 'nifty' && "The Nifty 50 index showed moderate growth on the back of positive market sentiment."}
+                      </p>
+                    </div>
+                    
+                    <div className="flex space-x-3">
+                      <button onClick={handleCloseSimulator} className="flex-1 btn-secondary">Try Another</button>
+                      <button onClick={handleInvestButtonClick} className="flex-1 btn-primary">Invest Now</button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
