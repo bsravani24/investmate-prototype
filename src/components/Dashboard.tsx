@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart as RPieChart, Pie, Cell, BarChart, Bar, CartesianGrid, Legend } from 'recharts';
 import { 
   ArrowUpRight, Award, BookOpen, TrendingUp, PieChart, 
@@ -28,6 +28,7 @@ interface InvestmentData {
 }
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [chartType, setChartType] = useState<'line' | 'bar'>('line');
@@ -37,7 +38,6 @@ const Dashboard: React.FC = () => {
   const [simulatorAmount, setSimulatorAmount] = useState<number>(1000);
   const [showSimulatorResults, setShowSimulatorResults] = useState<boolean>(false);
 
-  // Generate date-based chart data based on selected range
   const generateChartData = () => {
     const getDate = (daysAgo: number) => {
       const date = new Date();
