@@ -30,6 +30,7 @@ const SplashScreen: React.FC = () => {
           src="/lovable-uploads/f72e905c-580f-4fb8-bacc-c73d36692440.png" 
           alt="InvestMate Logo" 
           className="w-64 mx-auto mb-8"
+          style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3))' }}
         />
       </div>
       
